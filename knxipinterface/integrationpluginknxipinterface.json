@@ -1,0 +1,59 @@
+{
+    "id": "90f37061-9d08-459d-a0ef-a07a909e9d48",
+    "name": "KNXIP",
+    "displayName": "KNX/IP",
+    "vendors": [
+        {
+            "id": "2cca6ee1-3233-4adf-a8a3-c64f15bbd760",
+            "name": "KNX",
+            "displayName": "KNX",
+            "thingClasses": [
+                {
+                    "id": "9b1d68fb-f479-4a07-9075-85a12cb4fa02",
+                    "name": "KNXIPGateway",
+                    "displayName": "KNX/IP Gateway",
+                    "setupMethod": "JustAdd",
+                    "createMethods": ["user", "discovery"],
+                    "interfaces": [ "gateway" ],
+                    "paramTypes": [
+                        {
+                            "id": "e83d9d6a-633e-4427-946b-25df15d54f14",
+                            "name": "address",
+                            "displayName": "Server address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "192.168.8.140"
+                        },
+                        {
+                            "id": "9e750e01-90ce-449a-95e0-76feafce5c41",
+                            "name": "port",
+                            "displayName": "Server port",
+                            "type": "uint",
+                            "defaultValue": 3671
+                        },
+                        {
+                            "id": "e10a93e1-73ff-4b20-87e1-25d23d75a0d8",
+                            "name": "deviceClass",
+                            "displayName": "Device Class",
+                            "type": "QString",
+                            "defaultValue": "KNX",
+                            "readOnly": true
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "fa1e93e2-bc79-4917-93c7-62ec4756da93",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ],
+                    "actionTypes": [
+                    ]
+                }
+            ]
+        }
+    ]
+}
