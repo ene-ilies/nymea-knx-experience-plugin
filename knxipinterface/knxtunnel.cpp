@@ -37,6 +37,7 @@ KnxTunnel::KnxTunnel(const QHostAddress &remoteAddress, QObject *parent) :
     QObject(parent),
     m_remoteAddress(remoteAddress)
 {
+    qCDebug(dcKnxTunnelTraffic()) << "New knx tunnel";
     m_timer = new QTimer(this);
     m_timer->setSingleShot(false);
     m_timer->setInterval(5000);
@@ -47,7 +48,7 @@ KnxTunnel::KnxTunnel(const QHostAddress &remoteAddress, QObject *parent) :
     m_queueTimer->setInterval(500);
     connect(m_queueTimer, &QTimer::timeout, this, &KnxTunnel::onQueueTimeout);    
     
-    QKnxAddress interfaceAddress = { QKnxAddress::Type::Individual, "1.1.254" };
+    QKnxAddress interfaceAddress = { QKnxAddress::Type::Individual, "1.1.255" };
     QKnxNetIpSecureConfiguration secureConfiguration = QKnxNetIpSecureConfiguration::fromKeyring(QKnxNetIpSecureConfiguration::Type::Tunneling, interfaceAddress, QString("/etc/nymea/House.knxkeys"), QString("8d929dff-23b8-455d-840d-698b7e152e99").toUtf8(), true);
     m_tunnel = new QKnxNetIpTunnel(this);
     m_tunnel->setLocalPort(0);

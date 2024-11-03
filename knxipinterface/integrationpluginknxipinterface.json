@@ -30,14 +30,6 @@
                             "displayName": "Server port",
                             "type": "uint",
                             "defaultValue": 3671
-                        },
-                        {
-                            "id": "e10a93e1-73ff-4b20-87e1-25d23d75a0d8",
-                            "name": "deviceClass",
-                            "displayName": "Device Class",
-                            "type": "QString",
-                            "defaultValue": "KNX",
-                            "readOnly": true
                         }
                     ],
                     "stateTypes": [

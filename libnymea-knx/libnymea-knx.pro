@@ -19,16 +19,15 @@ PKGCONFIG += nymea
 
 HEADERS += \
     knxipjsonhandler.h \
-    knxtunnel.h \
-    knxserverdiscovery.h \
     integrationknxplugin.h \
-    knxipinterfacemanager.h 
+    knxipinterfacemanager.h \
+    thinglink.h
 
 SOURCES += \
     knxipjsonhandler.cpp \
-    knxtunnel.cpp \
-    knxserverdiscovery.cpp \
-    knxipinterfacemanager.cpp
+    integrationknxplugin.cpp \
+    knxipinterfacemanager.cpp \
+    thinglink.h
 
 target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target

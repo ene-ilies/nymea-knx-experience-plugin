@@ -27,11 +27,15 @@ TARGET = $$qtLibraryTarget(nymea_integrationpluginknxipinterface)
 INCLUDEPATH += $$top_srcdir/libnymea-knx
 LIBS += -L$$top_builddir/libnymea-knx -lnymea-knx
 
-SOURCES += \
-    integrationpluginknxipinterface.cpp
-
 HEADERS += \
+    knxtunnel.h \
+    knxserverdiscovery.h \
     integrationpluginknxipinterface.h
+
+SOURCES += \
+    knxtunnel.cpp \
+    knxserverdiscovery.cpp \
+    integrationpluginknxipinterface.cpp
 
 target.path = $$[QT_INSTALL_LIBS]/nymea/plugins/
 INSTALLS += target

@@ -31,9 +31,14 @@
 
 NYMEA_LOGGING_CATEGORY(dcKNXIPExperience, "KNXIP_Experience")
 
-IntegrationPluginKnxIPInterface::IntegrationPluginKnxIPInterface()
+IntegrationPluginKnxIPInterface::IntegrationPluginKnxIPInterface(QObject *parent):IntegrationKNXPlugin(parent)
 {
+    qCDebug(dcKNXIP()) << "KNX/IP Gateway instantiated.";
+}
 
+void IntegrationPluginKnxIPInterface::setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) {
+    qCDebug(dcKNXIP()) << "Set KNX/IP interface manager.";
+    this->interfaceManager = &interfaceManager;
 }
 
 void IntegrationPluginKnxIPInterface::init()
@@ -41,7 +46,7 @@ void IntegrationPluginKnxIPInterface::init()
     qCDebug(dcKNXIP()) << "KNX/IP Gateway initializing.";
     m_discovery = new KnxServerDiscovery(this);
 
-    connect(this, &IntegrationPluginKnx::configValueChanged, this, &IntegrationPluginKnx::onPluginConfigurationChanged);
+    connect(this, &IntegrationPlugin::configValueChanged, this, &IntegrationPluginKnxIPInterface::onPluginConfigurationChanged);
     qCDebug(dcKNXIP()) << "KNX/IP Gateway initialized.";
 }
 
@@ -67,12 +72,12 @@ void IntegrationPluginKnxIPInterface::discoverThings(ThingDiscoveryInfo *info)
                 params.append(Param(KNXIPGatewayThingAddressParamTypeId, serverInfo.controlEndpointAddress().toString()));
                 params.append(Param(KNXIPGatewayThingPortParamTypeId, serverInfo.controlEndpointPort()));
                 descriptor.setParams(params);
-                foreach (Thing *existingThing, myThings()) {
+                /*foreach (Thing *existingThing, myThings()) {
                     if (existingThing->paramValue(KNXIPGatewayThingAddressParamTypeId).toString() == serverInfo.controlEndpointAddress().toString()) {
                         descriptor.setThingId(existingThing->id());
                         break;
                     }
-                }
+                }*/
                 info->addThingDescriptor(descriptor);
             }
 
@@ -87,15 +92,18 @@ void IntegrationPluginKnxIPInterface::setupThing(ThingSetupInfo *info)
 
     if (!m_pluginTimer) {
         m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(300);
-        connect(m_pluginTimer, &PluginTimer::timeout, this, &IntegrationPluginKnx::onPluginTimerTimeout);
+        connect(m_pluginTimer, &PluginTimer::timeout, this, &IntegrationPluginKnxIPInterface::onPluginTimerTimeout);
     }
 
     if (info->thing()->thingClassId() == KNXIPGatewayThingClassId) {
+        this->knxInterface = info->thing();
         QHostAddress remoteAddress = QHostAddress(info->thing()->paramValue(KNXIPGatewayThingAddressParamTypeId).toString());
-        KnxTunnel *tunnel = new KnxTunnel(remoteAddress, this);
-        connect(tunnel, &KnxTunnel::connectedChanged, this, &IntegrationPluginKnx::onTunnelConnectedChanged);
-        //connect(tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnx::onTunnelFrameReceived);
-        this->interfaceManager->setKNXTunnel(tunnel);
+        this->tunnel = new KnxTunnel(remoteAddress, this);
+        connect(this->tunnel, &KnxTunnel::connectedChanged, this, &IntegrationPluginKnxIPInterface::onTunnelConnectedChanged);
+        connect(this->tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnxIPInterface::onTunnelFrameReceived);
+        if (this->interfaceManager != nullptr) {
+            qCDebug(dcKNXIP()) << "Interface manager is set.";
+        } 
     }
 
     /*if (info->thing()->thingClassId() == knxTriggerThingClassId) {
@@ -176,15 +184,18 @@ void IntegrationPluginKnxIPInterface::setupThing(ThingSetupInfo *info)
 void IntegrationPluginKnxIPInterface::postSetupThing(Thing *thing)
 {
     qCDebug(dcKNXIP()) << "Post setup device" << thing->name() << thing->params();
-    /*if (thing->thingClassId() == KNXIPGatewayThingClassId) {
-        KnxTunnel *tunnel = m_tunnels.key(thing);
-        tunnel->connectTunnel();
-        if (configValue(knxPluginGenericDevicesEnabledParamTypeId).toBool()) {
+    if (thing->thingClassId() == KNXIPGatewayThingClassId) {
+        qCDebug(dcKNXIP()) << "Connecting tunnel";
+        if (!this->tunnel->connectTunnel()) {
+            qCDebug(dcKNXIP()) << "Could not connect tunnel.";
+            return;
+        }
+        /*if (configValue(knxPluginGenericDevicesEnabledParamTypeId).toBool()) {
             createGenericDevices(thing);
         } else {
             destroyGenericDevices(thing);
-        }
-    }*/
+        }*/
+    }
 
     /*if (thing->thingClassId() == knxGenericSwitchThingClassId) {
         KnxTunnel *tunnel = getTunnelForDevice(thing);
@@ -310,14 +321,12 @@ void IntegrationPluginKnxIPInterface::postSetupThing(Thing *thing)
 void IntegrationPluginKnxIPInterface::thingRemoved(Thing *thing)
 {
     qCDebug(dcKNXIP()) << "Remove device" << thing->name() << thing->params();
-    /*if (thing->thingClassId() == KNXIPGatewayThingClassId) {
-        KnxTunnel *tunnel = m_tunnels.key(thing);
-        m_tunnels.remove(tunnel);
-        tunnel->disconnectTunnel();
+    if (thing->thingClassId() == KNXIPGatewayThingClassId) {
+        this->tunnel->disconnectTunnel();
         tunnel->deleteLater();
     }
 
-    if (myThings().isEmpty() && m_pluginTimer) {
+    /*if (myThings().isEmpty() && m_pluginTimer) {
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_pluginTimer);
         m_pluginTimer = nullptr;
     }*/
@@ -582,25 +591,6 @@ void IntegrationPluginKnxIPInterface::executeAction(ThingActionInfo *info)
     }*/
 
     info->finish(Thing::ThingErrorNoError);
-}
-
-KnxTunnel *IntegrationPluginKnxIPInterface::getTunnelForDevice(Thing *thing)
-{
-    Q_UNUSED(thing)
-    /*Thing *parent = nullptr;
-    foreach (Thing *t, myThings()) {
-        if (t->id() == thing->parentId()) {
-            parent = t;
-        }
-    }
-
-    if (!parent) {
-        qCWarning(dcKnx()) << "Could not find parent device for" << thing->name() << thing->id().toString();
-        return nullptr;
-    }
-
-    return m_tunnels.key(parent);*/
-    return nullptr;
 }
 
 void IntegrationPluginKnxIPInterface::autoCreateKnownDevices(Thing *parentThing)
@@ -915,10 +905,13 @@ void IntegrationPluginKnxIPInterface::onPluginConfigurationChanged(const ParamTy
 void IntegrationPluginKnxIPInterface::onTunnelConnectedChanged()
 {
     qCDebug(dcKnx()) << "Tunnel connected changed.";
-    /*KnxTunnel *tunnel = static_cast<KnxTunnel *>(sender());
-    Thing *thing = m_tunnels.value(tunnel);
-    if (!thing) return;
-    thing->setStateValue(KNXIPGatewayConnectedStateTypeId, tunnel->connected());*/
+    if (this->knxInterface == nullptr) {
+        qCDebug(dcKnx()) << "No gateway.";
+    } else {
+        qCDebug(dcKnx()) << "Set state on gateway. Connected: " << this->tunnel->connected();
+        this->knxInterface->setStateValue(KNXIPGatewayConnectedStateTypeId, this->tunnel->connected());
+    }
+
 
     // Update child devices connected state
     /*foreach (Thing *t, myThings()) {

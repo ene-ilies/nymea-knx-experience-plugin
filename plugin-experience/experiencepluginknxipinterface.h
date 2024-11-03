@@ -26,10 +26,12 @@
 
 #include <QLoggingCategory>
 #include <QMap>
+#include <QSet>
 #include <experiences/experienceplugin.h>
 #include "integrations/thingmanager.h"
 #include "knxipjsonhandler.h"
 #include "knxipinterfacemanager.h"
+#include <integrationknxplugin.h>
 #include <jsonrpc/jsonrpcserver.h>
 #include <loggingcategories.h>
 
@@ -46,16 +48,12 @@ public:
     void init() override;
 
 private:
-    QMap<const ThingId&, IntegrationKNXPlugin*> *thingsMap = nullptr;
     KNXIPInterfaceManager* interfaceManager = nullptr;
 
+    void watchPlugins();
     void watchThings();
     void watchThing(Thing *thing);
     void unwatchThing(const ThingId &thingId);
-
-/*public slots:
-    void setGatewayAddress(const QAddress &gatewayAddress);*/
-
 };
 
 #endif // EXPERIENCEPLUGINKNXIPINTERFACE_H

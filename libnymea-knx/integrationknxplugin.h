@@ -7,8 +7,10 @@
 
 class LIBNYMEA_EXPORT IntegrationKNXPlugin: public IntegrationPlugin {
     Q_OBJECT
-protected:
-    virtual void setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) = 0;
+public:
+    IntegrationKNXPlugin(QObject *parent = nullptr);
+    virtual ~IntegrationKNXPlugin();
+    virtual void setKNXIPInterfaceManager(KNXIPInterfaceManager &interfaceManager);
 };
 
 Q_DECLARE_INTERFACE(IntegrationKNXPlugin, "io.nymea.knx.IntegrationKNXPlugin")

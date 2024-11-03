@@ -22,20 +22,20 @@
 #define INTEGRATIONPLUGINKNX_H
 
 #include "plugintimer.h"
+#include "knxtunnel.h"
+#include "knxserverdiscovery.h"
 #include <knxipinterfacemanager.h>
 #include <integrationknxplugin.h>
-#include "knxserverdiscovery.h"
 #include <loggingcategories.h>
 
 class IntegrationPluginKnxIPInterface: public IntegrationKNXPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginknxipinterface.json")
-    Q_INTERFACES(IntegrationKNXPlugin)
-    Q_INTERFACES(IntegrationPlugin)
+    Q_PLUGIN_METADATA(IID "io.nymea.knx.IntegrationKNXPlugin" FILE "integrationpluginknxipinterface.json")
+    Q_INTERFACES(IntegrationKNXPlugin IntegrationPlugin)
 
 public:
-    explicit IntegrationPluginKnxIPInterface();
+    IntegrationPluginKnxIPInterface(QObject *parent = nullptr);
 
     void init() override;
     void startMonitoringAutoThings() override;
@@ -48,22 +48,19 @@ public:
 
     void executeAction(ThingActionInfo *info) override;
 
+    void setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) override;
 private:
     PluginTimer *m_pluginTimer = nullptr;
 
     KnxServerDiscovery *m_discovery = nullptr;
-    KNXIPInterfaceManager *interfaceManager = nullptr;
-
-    KnxTunnel *getTunnelForDevice(Thing *thing);
+    const KNXIPInterfaceManager *interfaceManager = nullptr;
+    KnxTunnel *tunnel = nullptr;
+    Thing* knxInterface = nullptr;
 
     void autoCreateKnownDevices(Thing *parentThing);
 
     void createGenericDevices(Thing *parentThing);
     void destroyGenericDevices(Thing *parentThing);
-    //void setKNXTunnel(const KnxTunnel *knxTunnel);
-
-/*signals:
-    gatewayAddressChanged(const QAddress &gatewayAddress);*/
 
 private slots:
     void onPluginTimerTimeout();

@@ -3,19 +3,23 @@
 
 #include <QLoggingCategory>
 #include <QObject>
-#include "knxtunnel.h"
+#include <QMap>
 #include <loggingcategories.h>
+#include "integrations/integrationplugin.h"
+#include "thinglink.h"
 
-Q_DECLARE_LOGGING_CATEGORY(dcKNXIPExperience)
-
-class KNXIPInterfaceManager: public QObject {
+class KNXIPInterfaceManager {
     Q_OBJECT
-private:
-    KnxTunnel* knxTunnel = nullptr;
 public:
+    KNXIPInterfaceManager(const ThingManager* thingManager);
     ~KNXIPInterfaceManager();
-    void setKNXTunnel(KnxTunnel *knxTunnel);
-    KnxTunnel* getKNXTunnel();
+    const ThingLink* registerInterface(ThingId interfaceId);
+    const QMap<ThingId, QString> availableInterfaces();
+    const ThingLink* link(ThingId interfaceId, ThingId clientId);
+private:
+    const ThingManager* thingManager = nullptr;
+    QMap<ThingId, const ThingLink*> interfaces;
+    QMap<ThingId, const ThingLink*> devices;
 };
 
 #endif //KNXIPINTERFACEMANAGER_H

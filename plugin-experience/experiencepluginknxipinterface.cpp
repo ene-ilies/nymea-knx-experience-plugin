@@ -27,17 +27,37 @@ NYMEA_LOGGING_CATEGORY(dcKNXIPExperience, "KNXIP_Experience")
 
 ExperiencePluginKnxIPInterface::ExperiencePluginKnxIPInterface()
 {
-    this->thingsMap = new QMap<const ThingId&, const IntegrationKNXPlugin*>();
-    this->interfaceManager = new KNXIPInterfaceManager();
+    this->interfaceManager = new KNXIPInterfaceManager(thingManager());
     qCDebug(dcKNXIPExperience()) << "KNX/IP Experience Plugin instance created.";
+}
+
+ExperiencePluginKnxIPInterface::~ExperiencePluginKnxIPInterface()
+{
+    delete this->interfaceManager;
+    qCDebug(dcKNXIPExperience()) << "KNX/IP Experience Plugin instance destroyed.";
 }
 
 void ExperiencePluginKnxIPInterface::init()
 {
     qCInfo(dcKNXIPExperience()) << "KNX/IP Experience Plugin initializing.";
-    //jsonRpcServer()->registerExperienceHandler(new KNXIPJsonHandler(this), 1, 0);
+    watchPlugins();
     watchThings();
     qCInfo(dcKNXIPExperience()) << "KNX/IP Experience Plugin initialized.";
+}
+
+void ExperiencePluginKnxIPInterface::watchPlugins()
+{
+    qCDebug(dcKNXIPExperience()) << "Register plugins watcher.";
+    ThingManager *tm = thingManager();
+    for (IntegrationPlugin *plugin : tm->plugins()) {
+        IntegrationKNXPlugin *knxPlugin = qobject_cast<IntegrationKNXPlugin *>(plugin);
+        if (knxPlugin != nullptr) {
+            qCInfo(dcKNXIPExperience()) << "Watch KNX plugin.";
+            this->knxPlugins->insert(knxPlugin->pluginId());
+            knxPlugin->setKNXIPInterfaceManager(this->interfaceManager);
+        }
+    }
+    qCDebug(dcKNXIPExperience()) << "Plugins watcher registered.";
 }
 
 void ExperiencePluginKnxIPInterface::watchThings() 
@@ -54,19 +74,23 @@ void ExperiencePluginKnxIPInterface::watchThings()
 
 void ExperiencePluginKnxIPInterface::watchThing(Thing *thing)
 {
-    qCInfo(dcKNXIPExperience()) << "Watching for new thing: " << thing->id().toString() << "|" << thing->name();
-    IntegrationKNXPlugin *knxThing = qobject_cast<IntegrationKNXPlugin *>( p );
-    if (knxThing != nullptr) {
-        qCInfo(dcKNXIPExperience()) << "Watch KNX plugin.";
-        this->thingsMap[thing->id()] = knxThing;
-        knxThing->setKNXIPInterfaceManager(this->interfaceManager);
+    if (!this->knxPlugins->contains(this->pluginId())) {
+        qCDebug(dcKNXIPExperience()) << "Thing is not a KNX thing. Skip watching it.";
+        return;
+    }
+    qCInfo(dcKNXIPExperience()) << "Watching for new KNX thing: " << thing->id() << "|" << thing->name();
+    if (thing->interfaces->contains("gateway")) {
+        qCInfo(dcKNXIPExperience()) << "New KNX Gateway added.";
+        this->interfaceManager->registerInterface();
+        knxThing->setKNXIPInterfaceManager(*this->interfaceManager);
         //connect(thing, &Thing::configValueChanged, this, &ExperiencePluginKnxIPInterface::onPluginConfigurationChanged);
     }
+    qCInfo(dcKNXIPExperience()) << "No KNX plugin.";
 }
 
 void ExperiencePluginKnxIPInterface::unwatchThing(const ThingId &thingId)
 {
-    qCInfo(dcKNXIPExperience()) << "Unwatching deleted thing with id: " << thingId.toString();
-    auto itemsRemoved = this->thingsMap.remove(thingId);
-    qCDebug(dcKNXIPExperience()) << "Removed: "  << itemsRemoved << "from things managed by this experience.";
+    qCInfo(dcKNXIPExperience()) << "Unwatching deleted thing with id: " << thingId;
+    auto itemsRemoved = this->thingsMap->remove(thingId);
+    qCDebug(dcKNXIPExperience()) << "Removed: "  << itemsRemoved << " from things managed by this experience.";
 }
