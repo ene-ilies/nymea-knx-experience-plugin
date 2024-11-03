@@ -3,9 +3,10 @@
 
 #include <QKnxLinkLayerFrame>
 
-class ThingLink {
+class ThingLink: public QObject {
     Q_OBJECT
-
+public:
+    virtual ~ThingLink();
 public slots:
     void frameReceivedHandler(const QKnxLinkLayerFrame &frame);
 signals:

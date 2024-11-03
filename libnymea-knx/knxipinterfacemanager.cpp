@@ -3,7 +3,7 @@
 
 NYMEA_LOGGING_CATEGORY(dcKNXIPExperience, "KNXIP_Experience")
 
-KNXIPInterfaceManager::KNXIPInterfaceManager(const ThingManager *thingManager)
+KNXIPInterfaceManager::KNXIPInterfaceManager(ThingManager *thingManager)
 {
     this->thingManager = thingManager;
     this->interfaces = new QMap<ThingId, const ThingLink *>();
@@ -18,29 +18,30 @@ KNXIPInterfaceManager::~KNXIPInterfaceManager()
         delete thingLink;
     }
     delete interfaces;
-    for (auto thingLink : this->devices.values())
+    for (auto thingLink : this->devices->values())
     {
         delete thingLink;
     }
     delete devices;
-    delete thingManager;
     qCDebug(dcKNXIPExperience()) << "KNX/IP Interface manager destroyed.";
 }
 
-void KNXIPInterfaceManager::registerInterface(ThingId thingId)
+const ThingLink* KNXIPInterfaceManager::registerInterface(ThingId thingId)
 {
-    this->interfaces->insert(thingId, new ThingLink());
+    auto interfaceLink = new ThingLink();
+    this->interfaces->insert(thingId, interfaceLink);
+    return interfaceLink;
 }
 
-const QMap<ThingId, QString> availableInterfaces()
+const QMap<ThingId, QString> KNXIPInterfaceManager::availableInterfaces()
 {
-    QMap<ThingId, QString> result();
-    for (auto thingId : this->interfaces->keys())
+    QMap<ThingId, QString> result;
+    for (const ThingId thingId : this->interfaces->keys())
     {
         auto interface = this->thingManager->findConfiguredThing(thingId);
         if (interface == nullptr)
         {
-            qCDebug(dcKNXIPExperience()) << "No thing found for interface thing with id" << thingId;
+            qCDebug(dcKNXIPExperience()) << "No thing found for interface thing with id" << thingId.toString();
             continue;
         }
         result.insert(thingId, interface.name());
@@ -48,17 +49,18 @@ const QMap<ThingId, QString> availableInterfaces()
     return result;
 }
 
-const ThingLink *KNXIPInterfaceManager::link(ThingId interfaceId, ThingId clientId)
+const ThingLink* KNXIPInterfaceManager::link(ThingId interfaceId, ThingId clientId)
 {
     auto clientLink = new ThingLink();
     auto interfaceLink = this->interfaces->value(interfaceId);
     if (interfaceLink == nullptr)
     {
-        qCDebug(dcKNXIPExperience()) << "No thing link found for interface thing with id" << interfaceId;
-        throw new std::invalid_argument("Unknown interface id:" + thingId);
+        qCDebug(dcKNXIPExperience()) << "No thing link found for interface thing with id" << interfaceId.toString();
+        throw std::invalid_argument("Unknown interface id:" + interfaceId.toString().toStdString());
     }
     this->devices->insert(clientId, clientLink);
     connect(interfaceLink, &ThingLink::frameReceived, clientLink, &ThingLink::frameReceivedHandler);
     connect(clientLink, &ThingLink::frameReceived, interfaceLink, &ThingLink::frameReceivedHandler);
-    qCInfo(dcKNXIPExperience()) << "Linked thing with id: " << clientId << " to interface thing with id" << interfaceId;
+    qCInfo(dcKNXIPExperience()) << "Linked thing with id: " << clientId << " to interface thing with id" << interfaceId.toString();
+    return clientLink;
 }
