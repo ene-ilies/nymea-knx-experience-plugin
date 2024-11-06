@@ -27,7 +27,7 @@ SOURCES += \
     knxipjsonhandler.cpp \
     integrationknxplugin.cpp \
     knxipinterfacemanager.cpp \
-    thinglink.h
+    thinglink.cpp
 
 target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target

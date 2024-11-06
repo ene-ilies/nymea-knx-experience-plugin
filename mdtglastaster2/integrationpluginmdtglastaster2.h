@@ -18,57 +18,44 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINKNXIPINTERFACE_H
-#define INTEGRATIONPLUGINKNXIPINTERFACE_H
+#ifndef INTEGRATIONPLUGINMDTGLASTASTER2_H
+#define INTEGRATIONPLUGINMDTGLASTASTER2_H
 
 #include "plugintimer.h"
-#include "knxtunnel.h"
-#include "knxserverdiscovery.h"
 #include <knxipinterfacemanager.h>
 #include <integrationknxplugin.h>
 #include <loggingcategories.h>
 
-class IntegrationPluginKnxIPInterface: public IntegrationKNXPlugin
+class IntegrationPluginKnxMDTGlastTaster2: public IntegrationKNXPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "io.nymea.knx.IntegrationKNXPlugin" FILE "integrationpluginknxipinterface.json")
+    Q_PLUGIN_METADATA(IID "io.nymea.knx.IntegrationKNXPlugin" FILE "integrationpluginmdtglastaster2.json")
     Q_INTERFACES(IntegrationKNXPlugin IntegrationPlugin)
 
 public:
-    IntegrationPluginKnxIPInterface(QObject *parent = nullptr);
+    IntegrationPluginKnxMDTGlastTaster2(QObject *parent = nullptr);
 
     void init() override;
-    void startMonitoringAutoThings() override;
 
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
 
     void postSetupThing(Thing *thing) override;
-    void thingRemoved(Thing *thing) override;
-
-    void executeAction(ThingActionInfo *info) override;
 
     void setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) override;
 private:
     PluginTimer *m_pluginTimer = nullptr;
-
-    KnxServerDiscovery *m_discovery = nullptr;
     const KNXIPInterfaceManager *interfaceManager = nullptr;
-    KnxTunnel *tunnel = nullptr;
-    Thing* knxInterface = nullptr;
-
-    void autoCreateKnownDevices(Thing *parentThing);
-
-    void createGenericDevices(Thing *parentThing);
-    void destroyGenericDevices(Thing *parentThing);
+    Thing *thing = nullptr;
+    const ThingLink *thingLink = nullptr;
 
 private slots:
     void onPluginTimerTimeout();
-    void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
-    void onTunnelConnectedChanged();
-    void onTunnelFrameReceived(const QKnxLinkLayerFrame &frame);
+    void connected();
+    void disconnected();
+    void frameReceived(const QKnxLinkLayerFrame &frame);
 
 };
 
-#endif // INTEGRATIONPLUGINKNXIPINTERFACE_H
+#endif // INTEGRATIONPLUGINMDTGLASTASTER2_H

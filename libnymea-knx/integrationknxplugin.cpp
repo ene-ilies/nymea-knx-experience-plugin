@@ -4,6 +4,6 @@ IntegrationKNXPlugin::IntegrationKNXPlugin(QObject *parent): IntegrationPlugin(p
 
 IntegrationKNXPlugin::~IntegrationKNXPlugin() {}
 
-void IntegrationKNXPlugin::setKNXIPInterfaceManager(KNXIPInterfaceManager &interfaceManager) {
+void IntegrationKNXPlugin::setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) {
     Q_UNUSED(interfaceManager)
 }

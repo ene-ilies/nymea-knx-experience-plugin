@@ -25,7 +25,6 @@
 #define EXPERIENCEPLUGINKNXIPINTERFACE_H
 
 #include <QLoggingCategory>
-#include <QMap>
 #include <QSet>
 #include <experiences/experienceplugin.h>
 #include "integrations/thingmanager.h"
@@ -45,10 +44,12 @@ class ExperiencePluginKnxIPInterface: public ExperiencePlugin
 
 public:
     ExperiencePluginKnxIPInterface();
+    virtual ~ExperiencePluginKnxIPInterface();
     void init() override;
 
 private:
     KNXIPInterfaceManager* interfaceManager = nullptr;
+    QSet<PluginId> *knxPlugins = nullptr;
 
     void watchPlugins();
     void watchThings();

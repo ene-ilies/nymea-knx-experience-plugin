@@ -1,0 +1,44 @@
+{
+    "id": "460a4e69-420b-440d-8cd6-5f958e503f7d",
+    "name": "MDTGlastaster2",
+    "displayName": "MDT Glastaster II",
+    "vendors": [
+        {
+            "id": "5cdf8db7-b72b-47f2-b75e-9c0a018980bf",
+            "name": "MDT",
+            "displayName": "MDT",
+            "thingClasses": [
+                {
+                    "id": "f3ce8afb-97ba-4cbb-a63e-8fa56bc3194f",
+                    "name": "Glastaster2",
+                    "displayName": "Glastaster II",
+                    "setupMethod": "JustAdd",
+                    "createMethods": ["user", "discovery"],
+                    "interfaces": [ "connectable" ],
+                    "paramTypes": [
+                        {
+                            "id": "a4ffd46e-cd13-454f-90ac-8abe303fae79",
+                            "name": "gateway",
+                            "displayName": "Gateway",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "849c6dd6-d4a5-4224-9b56-4a5718fe2d86",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ],
+                    "actionTypes": [
+                    ]
+                }
+            ]
+        }
+    ]
+}

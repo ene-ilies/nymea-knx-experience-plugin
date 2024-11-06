@@ -5,7 +5,8 @@
 #include <QObject>
 #include <QMap>
 #include <loggingcategories.h>
-#include "integrations/integrationplugin.h"
+#include <integrations/thingmanager.h>
+#include <integrations/integrationplugin.h>
 #include "thinglink.h"
 
 class ThingManager;
@@ -15,9 +16,9 @@ class KNXIPInterfaceManager: public QObject {
 public:
     KNXIPInterfaceManager(ThingManager* thingManager);
     ~KNXIPInterfaceManager();
-    const ThingLink* registerInterface(ThingId interfaceId);
-    const QMap<ThingId, QString> availableInterfaces();
-    const ThingLink* link(ThingId interfaceId, ThingId clientId);
+    const ThingLink* registerInterface(ThingId interfaceId) const;
+    const QMap<ThingId, QString> availableInterfaces() const;
+    const ThingLink* link(ThingId interfaceId, ThingId clientId) const;
 private:
     ThingManager* thingManager = nullptr;
     QMap<ThingId, const ThingLink*> *interfaces;

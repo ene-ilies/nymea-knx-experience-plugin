@@ -29,7 +29,7 @@
 #include <QKnx8BitUnsignedValue>
 #include <QKnxGroupAddressInfos>
 
-NYMEA_LOGGING_CATEGORY(dcKNXIPExperience, "KNXIP_Experience")
+NYMEA_LOGGING_CATEGORY(KNXIP, "KNXIPInterface")
 
 IntegrationPluginKnxIPInterface::IntegrationPluginKnxIPInterface(QObject *parent):IntegrationKNXPlugin(parent)
 {
@@ -38,7 +38,7 @@ IntegrationPluginKnxIPInterface::IntegrationPluginKnxIPInterface(QObject *parent
 
 void IntegrationPluginKnxIPInterface::setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) {
     qCDebug(dcKNXIP()) << "Set KNX/IP interface manager.";
-    this->interfaceManager = &interfaceManager;
+    this->interfaceManager = interfaceManager;
 }
 
 void IntegrationPluginKnxIPInterface::init()
@@ -103,6 +103,7 @@ void IntegrationPluginKnxIPInterface::setupThing(ThingSetupInfo *info)
         connect(this->tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnxIPInterface::onTunnelFrameReceived);
         if (this->interfaceManager != nullptr) {
             qCDebug(dcKNXIP()) << "Interface manager is set.";
+            this->interfaceManager->registerInterface(info->thing()->id());
         } 
     }
 

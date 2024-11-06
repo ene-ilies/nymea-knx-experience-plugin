@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET = $$qtLibraryTarget(nymea_experiencepluginknxip)
 
-QT += network
+QT += network knx
 
 CONFIG += plugin link_pkgconfig
 PKGCONFIG += nymea
