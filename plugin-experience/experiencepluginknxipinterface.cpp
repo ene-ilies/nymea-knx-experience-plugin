@@ -27,8 +27,6 @@ NYMEA_LOGGING_CATEGORY(dcKNXIPExperience, "KNXIP_Experience")
 
 ExperiencePluginKnxIPInterface::ExperiencePluginKnxIPInterface()
 {
-    this->interfaceManager = new KNXIPInterfaceManager(thingManager());
-    this->knxPlugins = new QSet<PluginId>();
     qCDebug(dcKNXIPExperience()) << "KNX/IP Experience Plugin instance created.";
 }
 
@@ -42,6 +40,8 @@ ExperiencePluginKnxIPInterface::~ExperiencePluginKnxIPInterface()
 void ExperiencePluginKnxIPInterface::init()
 {
     qCInfo(dcKNXIPExperience()) << "KNX/IP Experience Plugin initializing.";
+    this->interfaceManager = new KNXIPInterfaceManager(thingManager());
+    this->knxPlugins = new QSet<PluginId>();
     watchPlugins();
     watchThings();
     qCInfo(dcKNXIPExperience()) << "KNX/IP Experience Plugin initialized.";

@@ -29,8 +29,6 @@
 #include <QKnx8BitUnsignedValue>
 #include <QKnxGroupAddressInfos>
 
-NYMEA_LOGGING_CATEGORY(KNXIP, "KNXIPInterface")
-
 IntegrationPluginKnxIPInterface::IntegrationPluginKnxIPInterface(QObject *parent):IntegrationKNXPlugin(parent)
 {
     qCDebug(dcKNXIP()) << "KNX/IP Gateway instantiated.";
@@ -72,12 +70,6 @@ void IntegrationPluginKnxIPInterface::discoverThings(ThingDiscoveryInfo *info)
                 params.append(Param(KNXIPGatewayThingAddressParamTypeId, serverInfo.controlEndpointAddress().toString()));
                 params.append(Param(KNXIPGatewayThingPortParamTypeId, serverInfo.controlEndpointPort()));
                 descriptor.setParams(params);
-                /*foreach (Thing *existingThing, myThings()) {
-                    if (existingThing->paramValue(KNXIPGatewayThingAddressParamTypeId).toString() == serverInfo.controlEndpointAddress().toString()) {
-                        descriptor.setThingId(existingThing->id());
-                        break;
-                    }
-                }*/
                 info->addThingDescriptor(descriptor);
             }
 
@@ -100,11 +92,7 @@ void IntegrationPluginKnxIPInterface::setupThing(ThingSetupInfo *info)
         QHostAddress remoteAddress = QHostAddress(info->thing()->paramValue(KNXIPGatewayThingAddressParamTypeId).toString());
         this->tunnel = new KnxTunnel(remoteAddress, this);
         connect(this->tunnel, &KnxTunnel::connectedChanged, this, &IntegrationPluginKnxIPInterface::onTunnelConnectedChanged);
-        connect(this->tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnxIPInterface::onTunnelFrameReceived);
-        if (this->interfaceManager != nullptr) {
-            qCDebug(dcKNXIP()) << "Interface manager is set.";
-            this->interfaceManager->registerInterface(info->thing()->id());
-        } 
+        connect(this->tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnxIPInterface::onTunnelFrameReceived); 
     }
 
     /*if (info->thing()->thingClassId() == knxTriggerThingClassId) {
@@ -186,6 +174,11 @@ void IntegrationPluginKnxIPInterface::postSetupThing(Thing *thing)
 {
     qCDebug(dcKNXIP()) << "Post setup device" << thing->name() << thing->params();
     if (thing->thingClassId() == KNXIPGatewayThingClassId) {
+        if (this->interfaceManager != nullptr) {
+            qCDebug(dcKNXIP()) << "Interface manager is set. Registering interface with id: " << thing->id().toString();
+            this->thingLink = this->interfaceManager->registerInterface(thing->id());
+            qCDebug(dcKNXIP()) << "Interface with id: " << thing->id().toString() << " registered.";
+        }
         qCDebug(dcKNXIP()) << "Connecting tunnel";
         if (!this->tunnel->connectTunnel()) {
             qCDebug(dcKNXIP()) << "Could not connect tunnel.";
@@ -911,6 +904,8 @@ void IntegrationPluginKnxIPInterface::onTunnelConnectedChanged()
     } else {
         qCDebug(dcKnx()) << "Set state on gateway. Connected: " << this->tunnel->connected();
         this->knxInterface->setStateValue(KNXIPGatewayConnectedStateTypeId, this->tunnel->connected());
+        qCDebug(dcKnx()) << "Notify linked devices.";
+        this->thingLink->connected();
     }
 
 

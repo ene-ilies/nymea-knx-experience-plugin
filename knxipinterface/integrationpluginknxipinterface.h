@@ -21,12 +21,13 @@
 #ifndef INTEGRATIONPLUGINKNXIPINTERFACE_H
 #define INTEGRATIONPLUGINKNXIPINTERFACE_H
 
-#include "plugintimer.h"
-#include "knxtunnel.h"
-#include "knxserverdiscovery.h"
 #include <knxipinterfacemanager.h>
 #include <integrationknxplugin.h>
 #include <loggingcategories.h>
+#include "plugintimer.h"
+#include "knxtunnel.h"
+#include "knxserverdiscovery.h"
+#include "thinglink.h"
 
 class IntegrationPluginKnxIPInterface: public IntegrationKNXPlugin
 {
@@ -55,7 +56,8 @@ private:
     KnxServerDiscovery *m_discovery = nullptr;
     const KNXIPInterfaceManager *interfaceManager = nullptr;
     KnxTunnel *tunnel = nullptr;
-    Thing* knxInterface = nullptr;
+    Thing *knxInterface = nullptr;
+    const ThingLink *thingLink = nullptr;
 
     void autoCreateKnownDevices(Thing *parentThing);
 

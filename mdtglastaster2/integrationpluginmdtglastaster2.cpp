@@ -23,8 +23,6 @@
 
 #include <QObject>
 
-NYMEA_LOGGING_CATEGORY(MDTGlastaster2, "MDTGlastaster2")
-
 IntegrationPluginKnxMDTGlastTaster2::IntegrationPluginKnxMDTGlastTaster2(QObject *parent):IntegrationKNXPlugin(parent)
 {
     qCDebug(dcMDTGlastaster2()) << "MDT Glastaster II instantiated.";
@@ -46,8 +44,14 @@ void IntegrationPluginKnxMDTGlastTaster2::discoverThings(ThingDiscoveryInfo *inf
     qCDebug(dcMDTGlastaster2()) << "Discovering things...";
     if (info->thingClassId() == Glastaster2ThingClassId) {
         QMap<ThingId, QString> availableInterfaces = this->interfaceManager->availableInterfaces();
+        qCDebug(dcMDTGlastaster2()) << "Found " << availableInterfaces.size() << " gateways.";
         for (auto thingId : availableInterfaces.keys()) {
-            ThingDescriptor descriptor(thingId, "KNXIP Gateway", availableInterfaces.value(thingId));
+            auto name = availableInterfaces.value(thingId);
+            qCDebug(dcMDTGlastaster2()) << "Discovered gateway with id: " << thingId.toString() << " and name: " << name;
+            ThingDescriptor descriptor(Glastaster2ThingClassId, name, "KNXIP Gateway");
+            ParamList params;
+            params.append(Param(Glastaster2ThingGatewayParamTypeId, thingId));
+            descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
         info->finish(Thing::ThingErrorNoError);
@@ -63,24 +67,28 @@ void IntegrationPluginKnxMDTGlastTaster2::setupThing(ThingSetupInfo *info)
         connect(m_pluginTimer, &PluginTimer::timeout, this, &IntegrationPluginKnxMDTGlastTaster2::onPluginTimerTimeout);
     }
 
-    if (info->thing()->thingClassId() == Glastaster2ThingClassId) {
-        this->thing = info->thing();
-        ThingId gatewayThingId = info->thing()->id();
-        if (this->interfaceManager != nullptr) {
-            qCDebug(dcMDTGlastaster2()) << "Linking to gateway.";
-            this->thingLink = this->interfaceManager->link(gatewayThingId, info->thing()->id());
-            connect(this->thingLink, &ThingLink::connected, this, &IntegrationPluginKnxMDTGlastTaster2::connected);
-            connect(this->thingLink, &ThingLink::disconnected, this, &IntegrationPluginKnxMDTGlastTaster2::disconnected);
-            connect(this->thingLink, &ThingLink::frameReceived, this, &IntegrationPluginKnxMDTGlastTaster2::frameReceived);
-        } 
-    }
-
     info->finish(Thing::ThingErrorNoError);
 }
 
 void IntegrationPluginKnxMDTGlastTaster2::postSetupThing(Thing *thing)
 {
     qCDebug(dcMDTGlastaster2()) << "Post setup device" << thing->name() << thing->params();
+
+    if (thing->thingClassId() == Glastaster2ThingClassId) {
+        this->thing = thing;
+        qCDebug(dcMDTGlastaster2()) << "Getting param";
+        ThingId gatewayThingId(this->thing->paramValue(Glastaster2ThingGatewayParamTypeId).value<QString>());
+        if (this->interfaceManager != nullptr) {
+            qCDebug(dcMDTGlastaster2()) << "Linking to gateway.";
+            this->thingLink = this->interfaceManager->link(gatewayThingId, this->thing->id());
+            if (this->thingLink != nullptr) {
+                qCDebug(dcMDTGlastaster2()) << "Linking to gateway.";
+                connect(this->thingLink, &ThingLink::connectedEvent, this, &IntegrationPluginKnxMDTGlastTaster2::connected);
+                connect(this->thingLink, &ThingLink::disconnectedEvent, this, &IntegrationPluginKnxMDTGlastTaster2::disconnected);
+                connect(this->thingLink, &ThingLink::frameReceivedEvent, this, &IntegrationPluginKnxMDTGlastTaster2::frameReceived);
+            }
+        }
+    }
 }
 
 void IntegrationPluginKnxMDTGlastTaster2::onPluginTimerTimeout()

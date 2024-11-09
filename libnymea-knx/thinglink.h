@@ -5,16 +5,14 @@
 
 class ThingLink: public QObject {
     Q_OBJECT
-public:
-    virtual ~ThingLink();
 public slots:
-    void connected();
-    void disconnected();
-    void frameReceived(const QKnxLinkLayerFrame &frame);
+    void connected() const;
+    void disconnected() const;
+    void frameReceived(const QKnxLinkLayerFrame &frame) const;
 signals:
-    void frameReceivedEvent(const QKnxLinkLayerFrame &frame);
-    void connectedEvent();
-    void disconnectedEvent();
+    void frameReceivedEvent(const QKnxLinkLayerFrame &frame) const;
+    void connectedEvent() const;
+    void disconnectedEvent() const;
 };
 
 #endif //THINGLINK_H

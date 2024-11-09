@@ -21,7 +21,7 @@
                             "name": "gateway",
                             "displayName": "Gateway",
                             "type": "QString",
-                            "inputType": "TextLine",
+                            "inputType": "None",
                             "defaultValue": ""
                         }
                     ],
