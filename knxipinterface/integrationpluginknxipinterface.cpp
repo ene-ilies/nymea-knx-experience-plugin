@@ -92,7 +92,7 @@ void IntegrationPluginKnxIPInterface::setupThing(ThingSetupInfo *info)
         QHostAddress remoteAddress = QHostAddress(info->thing()->paramValue(KNXIPGatewayThingAddressParamTypeId).toString());
         this->tunnel = new KnxTunnel(remoteAddress, this);
         connect(this->tunnel, &KnxTunnel::connectedChanged, this, &IntegrationPluginKnxIPInterface::onTunnelConnectedChanged);
-        connect(this->tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnxIPInterface::onTunnelFrameReceived); 
+        connect(this->tunnel, &KnxTunnel::frameReceived, this, &IntegrationPluginKnxIPInterface::onTunnelFrameReceived);
     }
 
     /*if (info->thing()->thingClassId() == knxTriggerThingClassId) {
@@ -177,6 +177,7 @@ void IntegrationPluginKnxIPInterface::postSetupThing(Thing *thing)
         if (this->interfaceManager != nullptr) {
             qCDebug(dcKNXIP()) << "Interface manager is set. Registering interface with id: " << thing->id().toString();
             this->thingLink = this->interfaceManager->registerInterface(thing->id());
+            connect(this->thingLink, &ThingLink::sendFrameEvent, this, &IntegrationPluginKnxIPInterface::onThingLinkSendFrame); 
             qCDebug(dcKNXIP()) << "Interface with id: " << thing->id().toString() << " registered.";
         }
         qCDebug(dcKNXIP()) << "Connecting tunnel";
@@ -304,6 +305,22 @@ void IntegrationPluginKnxIPInterface::postSetupThing(Thing *thing)
             // TODO: read brightness
         }
     }*/
+}
+
+void IntegrationPluginKnxIPInterface::onThingLinkSendFrame(const QKnxLinkLayerFrame &frame) {
+    if (this->tunnel == nullptr) {
+        qCInfo(dcKNXIP()) << "No tunnel object available. Ignoring frame.";
+        return;
+    }
+
+    qCDebug(dcKNXIP()) << "Checking if connection is established.";
+    if (!this->tunnel->connected()) {
+        qCWarning(dcKNXIP()) << "Cannot send frame on tunnel" << this->tunnel->remoteAddress().toString() << " because the tunnel is not connected.";
+        return;
+    }
+
+    qCDebug(dcKNXIP()) << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss") << "--> Sending frame" << frame << frame.destinationAddress().toString() << frame.tpdu().data().toHex().toByteArray();
+    this->tunnel->requestSendFrame(frame);
 }
 
 /*void IntegrationPluginKnx::setKNXTunnel(const KnxTunnel *knxTunnel) 

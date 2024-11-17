@@ -11,3 +11,7 @@ void ThingLink::disconnected() const {
 void ThingLink::frameReceived(const QKnxLinkLayerFrame &frame) const {
     emit frameReceivedEvent(frame);
 }
+
+void ThingLink::sendFrame(const QKnxLinkLayerFrame &frame) const {
+    emit sendFrameEvent(frame);
+}

@@ -56,8 +56,7 @@ public:
     void readKnxDpdScalingState(const QKnxAddress &knxAddress);
     void readKnxDpdTemperatureSensor(const QKnxAddress &knxAddress);
 
-    static void printFrame(const QKnxLinkLayerFrame &frame);
-
+    void requestSendFrame(const QKnxLinkLayerFrame &frame);
 private:
     QHostAddress m_localAddress;
     QHostAddress m_remoteAddress;
@@ -70,7 +69,7 @@ private:
     QQueue<QKnxLinkLayerFrame> m_sendingQueue;
 
     // Helper
-    void requestSendFrame(const QKnxLinkLayerFrame &frame);
+    static void printFrame(const QKnxLinkLayerFrame &frame);
     void sendFrame(const QKnxLinkLayerFrame &frame);
     QHostAddress getLocalAddress(const QHostAddress &remoteAddress);
 

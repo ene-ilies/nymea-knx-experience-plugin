@@ -18,16 +18,16 @@ CONFIG += link_pkgconfig
 PKGCONFIG += nymea
 
 HEADERS += \
-    knxipjsonhandler.h \
     integrationknxplugin.h \
     knxipinterfacemanager.h \
-    thinglink.h
+    thinglink.h \
+    knxframe.h
 
 SOURCES += \
-    knxipjsonhandler.cpp \
     integrationknxplugin.cpp \
     knxipinterfacemanager.cpp \
-    thinglink.cpp
+    thinglink.cpp \
+    knxframe.cpp
 
 target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target

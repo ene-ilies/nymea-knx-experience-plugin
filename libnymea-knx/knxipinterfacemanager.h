@@ -9,7 +9,7 @@
 #include <integrations/integrationplugin.h>
 #include "thinglink.h"
 
-class ThingManager;
+Q_DECLARE_LOGGING_CATEGORY(dcKNXLib)
 
 class KNXIPInterfaceManager: public QObject {
     Q_OBJECT

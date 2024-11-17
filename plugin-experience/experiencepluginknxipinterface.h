@@ -28,7 +28,6 @@
 #include <QSet>
 #include <experiences/experienceplugin.h>
 #include "integrations/thingmanager.h"
-#include "knxipjsonhandler.h"
 #include "knxipinterfacemanager.h"
 #include <integrationknxplugin.h>
 #include <jsonrpc/jsonrpcserver.h>

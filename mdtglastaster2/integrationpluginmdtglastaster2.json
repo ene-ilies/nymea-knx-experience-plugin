@@ -10,11 +10,11 @@
             "thingClasses": [
                 {
                     "id": "f3ce8afb-97ba-4cbb-a63e-8fa56bc3194f",
-                    "name": "Glastaster2",
-                    "displayName": "Glastaster II",
+                    "name": "dimmer",
+                    "displayName": "Dimmer",
                     "setupMethod": "JustAdd",
                     "createMethods": ["user", "discovery"],
-                    "interfaces": [ "connectable" ],
+                    "interfaces": [ "connectable", "dimmablelight" ],
                     "paramTypes": [
                         {
                             "id": "a4ffd46e-cd13-454f-90ac-8abe303fae79",
@@ -23,6 +23,20 @@
                             "type": "QString",
                             "inputType": "None",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "6fd315c6-0c72-4466-a146-fc8a36e9d5db",
+                            "name": "dimmerGroup",
+                            "displayName": "Dimmer address",
+                            "type": "QString",
+                            "defaultValue": "0/0/0"
+                        },
+                        {
+                            "id": "c1f000e0-01f2-4738-9f44-660ccafdffab",
+                            "name": "switchGroup",
+                            "displayName": "Switch address",
+                            "type": "QString",
+                            "defaultValue": "0/0/0"
                         }
                     ],
                     "stateTypes": [
@@ -33,9 +47,34 @@
                             "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "defaultValue": false
+                        },
+                        {
+                            "id": "260f39f3-0274-47e8-b546-c5cee2894e15",
+                            "name": "brightness",
+                            "displayName": "Brightness",
+                            "displayNameAction": "brightness",
+                            "type": "int",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "writable": true,
+                            "defaultValue": 50
+                        },
+                        {
+                            "id": "6bdd9c04-c671-486d-a862-2f37471a1166",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameAction": "power",
+                            "type": "bool",
+                            "writable": true,
+                            "defaultValue": false
                         }
                     ],
                     "actionTypes": [
+                        {
+                            "id": "9c39ba85-36e4-477a-9d6c-3ba3feb4c921",
+                            "name": "read",
+                            "displayName": "Read"
+                        }
                     ]
                 }
             ]

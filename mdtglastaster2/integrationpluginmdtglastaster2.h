@@ -43,6 +43,8 @@ public:
     void postSetupThing(Thing *thing) override;
 
     void setKNXIPInterfaceManager(const KNXIPInterfaceManager *interfaceManager) override;
+
+    void executeAction(ThingActionInfo *info) override;
 private:
     PluginTimer *m_pluginTimer = nullptr;
     const KNXIPInterfaceManager *interfaceManager = nullptr;

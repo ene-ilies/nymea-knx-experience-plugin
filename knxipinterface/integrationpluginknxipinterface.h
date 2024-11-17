@@ -70,7 +70,7 @@ private slots:
 
     void onTunnelConnectedChanged();
     void onTunnelFrameReceived(const QKnxLinkLayerFrame &frame);
-
+    void onThingLinkSendFrame(const QKnxLinkLayerFrame &frame);
 };
 
 #endif // INTEGRATIONPLUGINKNXIPINTERFACE_H

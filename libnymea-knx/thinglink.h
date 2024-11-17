@@ -9,8 +9,10 @@ public slots:
     void connected() const;
     void disconnected() const;
     void frameReceived(const QKnxLinkLayerFrame &frame) const;
+    void sendFrame(const QKnxLinkLayerFrame &frame) const;
 signals:
     void frameReceivedEvent(const QKnxLinkLayerFrame &frame) const;
+    void sendFrameEvent(const QKnxLinkLayerFrame &frame) const;
     void connectedEvent() const;
     void disconnectedEvent() const;
 };

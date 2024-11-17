@@ -41,8 +41,6 @@
                             "type": "bool",
                             "defaultValue": false
                         }
-                    ],
-                    "actionTypes": [
                     ]
                 }
             ]
